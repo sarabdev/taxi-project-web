@@ -10,11 +10,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@stripe/react-stripe-js": "^5.2.0",
-    "@stripe/stripe-js": "^8.0.0",
+    "@google-pay/button-react": "^3.2.1",
+    "@stripe/react-stripe-js": "^5.4.1",
+    "@stripe/stripe-js": "^8.6.0",
     "lucide-react": "^0.545.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
+    "react-google-autocomplete": "^2.7.5",
+    "react-google-places-autocomplete": "^4.1.0",
     "react-router-dom": "^7.9.4"
   },
   "devDependencies": {

@@ -18,10 +18,13 @@ const Navbar = () => {
     <nav className="bg-white shadow-lg sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
+          {/* Logo */}
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-2">
               <Car className="h-8 w-8 text-primary-600" />
-              <span className="text-2xl font-bold text-gray-900">AirportRide</span>
+              <span className="text-2xl font-bold text-gray-900">
+                AirportRide
+              </span>
             </Link>
           </div>
 
@@ -31,30 +34,54 @@ const Navbar = () => {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`text-sm font-medium transition-colors ${
-                  isActive(item.path)
+                className={`text-sm font-medium transition-colors ${isActive(item.path)
                     ? 'text-primary-600'
                     : 'text-gray-700 hover:text-primary-600'
-                }`}
+                  }`}
               >
                 {item.name}
               </Link>
             ))}
-            <Link
-              to="/booking"
-              className="btn-primary py-2 px-4 text-sm"
-            >
+
+            {/* Services Dropdown (Desktop Hover) */}
+            <div className="relative group">
+              <span className="cursor-pointer text-sm font-medium text-gray-700 hover:text-primary-600">
+                Services
+              </span>
+
+              <div className="absolute left-0 mt-2 w-56 rounded-md bg-white shadow-lg border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                <Link
+                  to="/services/personal-accounts"
+                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                >
+                  Personal Accounts
+                </Link>
+                <Link
+                  to="/services/airport-taxis"
+                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                >
+                  Airport Taxis
+                </Link>
+              </div>
+            </div>
+
+            {/* Book Now */}
+            <Link to="/booking" className="btn-primary py-2 px-4 text-sm">
               Book Now
             </Link>
           </div>
 
-          {/* Mobile menu button */}
+          {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center">
             <button
               onClick={() => setIsOpen(!isOpen)}
               className="text-gray-700 hover:text-primary-600"
             >
-              {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              {isOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
             </button>
           </div>
         </div>
@@ -69,15 +96,39 @@ const Navbar = () => {
                 key={item.path}
                 to={item.path}
                 onClick={() => setIsOpen(false)}
-                className={`block px-3 py-2 rounded-md text-base font-medium ${
-                  isActive(item.path)
+                className={`block px-3 py-2 rounded-md text-base font-medium ${isActive(item.path)
                     ? 'bg-primary-50 text-primary-600'
                     : 'text-gray-700 hover:bg-gray-50'
-                }`}
+                  }`}
               >
                 {item.name}
               </Link>
             ))}
+
+            {/* Services (Mobile) */}
+            <div className="px-3 py-2">
+              <div className="text-sm font-semibold text-gray-900 mb-1">
+                Services
+              </div>
+
+              <Link
+                to="/services/personal-accounts"
+                onClick={() => setIsOpen(false)}
+                className="block px-3 py-2 rounded-md text-base text-gray-700 hover:bg-gray-50"
+              >
+                Personal Accounts
+              </Link>
+
+              <Link
+                to="/services/airport-taxis"
+                onClick={() => setIsOpen(false)}
+                className="block px-3 py-2 rounded-md text-base text-gray-700 hover:bg-gray-50"
+              >
+                Airport Taxis
+              </Link>
+            </div>
+
+            {/* Book Now */}
             <Link
               to="/booking"
               onClick={() => setIsOpen(false)}
@@ -93,4 +144,3 @@ const Navbar = () => {
 };
 
 export default Navbar;
-
