@@ -1,8 +1,16 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Lock, CheckCircle } from "lucide-react";
+import { Elements } from "@stripe/react-stripe-js";
+import { loadStripe } from "@stripe/stripe-js";
+
 import { useBookings } from "../contexts/BookingsContext";
-import GooglePayComponent from "../components/GooglePayComponent";
+import { paymentService } from "../services/paymentService";
+import StripePaymentForm from "../components/StripePaymentForm";
+
+const stripePromise = loadStripe(
+  import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
+);
 
 const Payment = () => {
   const navigate = useNavigate();
@@ -13,53 +21,113 @@ const Payment = () => {
     clearDraftBooking,
   } = useBookings();
 
+  const [clientSecret, setClientSecret] = useState(null);
   const [processing, setProcessing] = useState(false);
   const [completed, setCompleted] = useState(false);
+  const [error, setError] = useState(null);
 
-  // --------------------------------
-  // Guard: must have draft booking
-  // --------------------------------
+  /**
+   * ---------------------------------------------------------
+   * GUARD + CREATE PAYMENT INTENT
+   * ---------------------------------------------------------
+   */
   useEffect(() => {
     if (!draftBooking) {
       navigate("/");
+      return;
     }
+
+    const initPayment = async () => {
+      setError(null);
+
+      const res = await paymentService.createPaymentIntent({
+        amount: draftBooking.pricing.totalAmount,
+        currency: "GBP",
+        bookingId: draftBooking.tempId || "draft",
+      });
+
+      if (!res.ok) {
+        setError(res.message || "Failed to initialize payment");
+        return;
+      }
+
+      setClientSecret(res.data.clientSecret);
+    };
+
+    initPayment();
   }, [draftBooking, navigate]);
 
   if (!draftBooking) return null;
 
   const { pricing } = draftBooking;
 
-  // --------------------------------
-  // Google Pay success handler
-  // --------------------------------
-  const handleGooglePaySuccess = async (paymentResult) => {
+  /**
+   * ---------------------------------------------------------
+   * STRIPE SUCCESS HANDLER
+   * ---------------------------------------------------------
+   */
+  const handleStripeSuccess = async ({
+    stripePaymentIntentId,
+    stripePaymentMethodId,
+  }) => {
+    if (processing) return;
+
     try {
       setProcessing(true);
+      setError(null);
 
-      // ✅ Create booking only AFTER payment confirmed
-      createBooking({
-        ...draftBooking,
-        paymentStatus: "paid",
-        paymentProvider: "google_pay",
-        paymentReference: paymentResult?.paymentIntentId || null,
-        paidAt: new Date().toISOString(),
+      const res = await createBooking({
+        fromAddress: draftBooking.fromAddress,
+        toAddress: draftBooking.toAddress,
+
+        // ✅ NEW text-based fields
+        bookingDate: draftBooking.bookingDate,
+        bookingTime: draftBooking.bookingTime,
+        returnDate: draftBooking.returnDate,
+        returnTime: draftBooking.returnTime,
+
+        numberOfPersons: draftBooking.numberOfPersons,
+        luggage: draftBooking.luggage,
+        carType: draftBooking.carType,
+
+        amount: pricing.totalAmount,
+        currency: "GBP",
+
+        stripePaymentIntentId,
+        stripePaymentMethodId,
       });
+
+      if (!res?.success) {
+        setError(
+          res?.message ||
+          "Payment succeeded, but booking could not be confirmed."
+        );
+        setProcessing(false);
+        return;
+      }
 
       clearDraftBooking();
       setCompleted(true);
 
-      setTimeout(() => navigate("/"), 3000);
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 2500);
     } catch (err) {
       console.error("Booking creation failed:", err);
-      alert("Payment succeeded, but booking failed. Please contact support.");
+      setError(
+        "Payment was successful, but booking failed. Please contact support."
+      );
     } finally {
       setProcessing(false);
     }
   };
 
-  // --------------------------------
-  // SUCCESS VIEW
-  // --------------------------------
+
+  /**
+   * ---------------------------------------------------------
+   * SUCCESS VIEW
+   * ---------------------------------------------------------
+   */
   if (completed) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4">
@@ -74,17 +142,11 @@ const Payment = () => {
             </h2>
 
             <p className="text-gray-600 mb-6">
-              Thank you for your booking. You will receive confirmation shortly.
+              Your payment was successful and your booking is confirmed.
             </p>
 
             <div className="bg-gray-50 rounded-lg p-6 mb-6">
               <div className="space-y-3 text-left">
-                {draftBooking.isRoundTrip && (
-                  <div className="bg-primary-100 text-primary-700 px-3 py-1 rounded text-sm font-semibold">
-                    ✓ Round Trip Booked
-                  </div>
-                )}
-
                 <div className="flex justify-between">
                   <span className="text-gray-600">From:</span>
                   <span className="font-semibold">
@@ -109,7 +171,7 @@ const Payment = () => {
             </div>
 
             <p className="text-sm text-gray-500">
-              Redirecting to home page…
+              Redirecting to dashboard…
             </p>
           </div>
         </div>
@@ -117,12 +179,15 @@ const Payment = () => {
     );
   }
 
-  // --------------------------------
-  // PAYMENT PAGE
-  // --------------------------------
+  /**
+   * ---------------------------------------------------------
+   * PAYMENT PAGE
+   * ---------------------------------------------------------
+   */
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+
         {/* Header */}
         <div className="mb-8">
           <button
@@ -143,35 +208,47 @@ const Payment = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* PAYMENT METHOD */}
+          {/* PAYMENT */}
           <div className="lg:col-span-2">
             <div className="card">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-semibold">
-                  Choose Payment Method
+                  Secure Payment
                 </h2>
                 <div className="flex items-center text-sm text-gray-500">
                   <Lock className="h-4 w-4 mr-1" />
-                  Secure Payment
+                  Stripe Protected
                 </div>
               </div>
 
-              {/* GOOGLE PAY */}
-              <GooglePayComponent
-                fare={pricing.totalAmount}
-                bookingId={draftBooking.tempId || "draft"}
-                onSuccess={handleGooglePaySuccess}
-              />
+              {!clientSecret ? (
+                <p className="text-sm text-gray-500">
+                  Initializing payment…
+                </p>
+              ) : (
+                <Elements
+                  stripe={stripePromise}
+                  options={{ clientSecret }}
+                >
+                  <StripePaymentForm onSuccess={handleStripeSuccess} />
+                </Elements>
+              )}
 
               {processing && (
                 <p className="text-sm text-gray-500 mt-4">
-                  Processing payment…
+                  Finalizing booking…
+                </p>
+              )}
+
+              {error && (
+                <p className="text-sm text-red-600 mt-4">
+                  {error}
                 </p>
               )}
             </div>
           </div>
 
-          {/* BOOKING SUMMARY */}
+          {/* SUMMARY */}
           <div className="lg:col-span-1">
             <div className="card sticky top-24">
               <h2 className="text-xl font-semibold mb-6">
@@ -209,6 +286,7 @@ const Payment = () => {
               </div>
             </div>
           </div>
+
         </div>
       </div>
     </div>

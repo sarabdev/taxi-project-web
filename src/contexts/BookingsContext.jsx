@@ -50,6 +50,29 @@ export const BookingsProvider = ({ children }) => {
     }, [isAuthenticated, user, loadBookings]);
 
     // ----------------------------------
+    // GET SINGLE BOOKING (DETAIL PAGE)
+    // ----------------------------------
+    const getBookingById = async (bookingId) => {
+        if (!isAuthenticated) {
+            return { success: false, message: "Unauthorized" };
+        }
+
+        const res = await bookingService.getMyBookingById(bookingId);
+        console.log(res)
+        // Normalize response shape
+        if (res?.ok && res?.booking) {
+            console.log("test")
+            return res;
+        }
+
+        return {
+            success: false,
+            message: res?.message || "Booking not found",
+        };
+    };
+
+
+    // ----------------------------------
     // CREATE FINAL BOOKING (POST-PAYMENT)
     // ----------------------------------
     const createBooking = async (payload) => {
@@ -97,10 +120,16 @@ export const BookingsProvider = ({ children }) => {
 
             // 🔹 Actions
             reloadBookings: loadBookings,
+            getBookingById,          // ✅ ADDED
             createBooking,
             cancelBooking,
         }),
-        [bookings, loading, draftBooking, loadBookings]
+        [
+            bookings,
+            loading,
+            draftBooking,
+            loadBookings,
+        ]
     );
 
     return (

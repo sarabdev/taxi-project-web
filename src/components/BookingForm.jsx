@@ -53,11 +53,24 @@ const BookingForm = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!fromPlace || !toPlace) return;
+        // --------------------------------
+        // Basic validation
+        // --------------------------------
+        if (!fromPlace || !toPlace) {
+            alert("Please select pickup and drop-off locations");
+            return;
+        }
+
+        if (!formData.bookingDate || !formData.bookingTime) {
+            alert("Please enter booking date and time");
+            return;
+        }
 
         setLoading(true);
 
+        // --------------------------------
         // 1️⃣ Call pricing API
+        // --------------------------------
         const pricingRes = await pricingService.calculatePrice({
             fromPlaceId: fromPlace.value.place_id,
             toPlaceId: toPlace.value.place_id,
@@ -71,9 +84,14 @@ const BookingForm = () => {
 
         const { distance, pricing } = pricingRes.data;
 
-        // 2️⃣ Build booking draft (WITH pricing)
+        // --------------------------------
+        // 2️⃣ Build booking draft (NO date parsing)
+        // --------------------------------
         const draftBooking = {
-            source: "web",
+            // 🔑 Used for Stripe metadata & tracking
+            tempId: `draft_${Date.now()}`,
+
+            source: "website",
             paymentMethod: "stripe",
 
             fromAddress: fromPlace.label,
@@ -85,15 +103,14 @@ const BookingForm = () => {
             numberOfPersons: Number(formData.numberOfPersons),
             luggage: Number(formData.luggage),
 
-            pickupDateTime: new Date(
-                `${formData.pickupDate}T${formData.pickupTime}`
-            ),
+            // ✅ Open text fields (stored exactly as entered)
+            bookingDate: formData.bookingDate,
+            bookingTime: formData.bookingTime,
 
-            returnDateTime: formData.isRoundTrip
-                ? new Date(`${formData.returnDate}T${formData.returnTime}`)
-                : null,
+            returnDate: formData.isRoundTrip ? formData.returnDate : null,
+            returnTime: formData.isRoundTrip ? formData.returnTime : null,
 
-            // 🔥 Pricing snapshot (IMPORTANT)
+            // 🔥 Pricing snapshot (immutable after this)
             pricing: {
                 distanceMeters: distance.meters,
                 distanceMiles: distance.miles,
@@ -103,14 +120,19 @@ const BookingForm = () => {
             },
         };
 
+        // --------------------------------
         // 3️⃣ Store draft in context
+        // --------------------------------
         setDraftBooking(draftBooking);
 
         setLoading(false);
 
-        // 4️⃣ Navigate to payment
+        // --------------------------------
+        // 4️⃣ Navigate to payment page
+        // --------------------------------
         navigate("/booking/payment");
     };
+
 
     return (
         <div className="card">
@@ -122,9 +144,7 @@ const BookingForm = () => {
                 {/* FROM / TO */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label className="block text-sm font-medium mb-2">
-                            From
-                        </label>
+                        <label className="block text-sm font-medium mb-2">From</label>
                         <GooglePlacesAutocomplete
                             apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}
                             selectProps={{
@@ -137,9 +157,7 @@ const BookingForm = () => {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium mb-2">
-                            To
-                        </label>
+                        <label className="block text-sm font-medium mb-2">To</label>
                         <GooglePlacesAutocomplete
                             apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}
                             selectProps={{
@@ -231,51 +249,61 @@ const BookingForm = () => {
 
                 {/* DATES */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* BOOKING DATE & TIME */}
                     <div>
                         <label className="block text-sm font-medium mb-2">
                             <Calendar className="inline h-4 w-4 mr-2" />
-                            Pickup Date & Time
+                            Booking Date & Time
                         </label>
+
                         <div className="grid grid-cols-2 gap-3">
                             <input
-                                type="date"
-                                name="pickupDate"
-                                value={formData.pickupDate}
+                                type="text"
+                                name="bookingDate"
+                                value={formData.bookingDate}
                                 onChange={handleChange}
+                                placeholder="e.g. 25 Sept 2025"
                                 className="input-field"
                                 required
                             />
+
                             <input
-                                type="time"
-                                name="pickupTime"
-                                value={formData.pickupTime}
+                                type="text"
+                                name="bookingTime"
+                                value={formData.bookingTime}
                                 onChange={handleChange}
+                                placeholder="e.g. 6:30 PM"
                                 className="input-field"
                                 required
                             />
                         </div>
                     </div>
 
+                    {/* RETURN DATE & TIME (ROUND TRIP) */}
                     {formData.isRoundTrip && (
                         <div>
                             <label className="block text-sm font-medium mb-2">
                                 <Calendar className="inline h-4 w-4 mr-2" />
                                 Return Date & Time
                             </label>
+
                             <div className="grid grid-cols-2 gap-3">
                                 <input
-                                    type="date"
+                                    type="text"
                                     name="returnDate"
                                     value={formData.returnDate}
                                     onChange={handleChange}
+                                    placeholder="e.g. 30 Sept 2025"
                                     className="input-field"
                                     required
                                 />
+
                                 <input
-                                    type="time"
+                                    type="text"
                                     name="returnTime"
                                     value={formData.returnTime}
                                     onChange={handleChange}
+                                    placeholder="e.g. 9:00 AM"
                                     className="input-field"
                                     required
                                 />
@@ -283,6 +311,7 @@ const BookingForm = () => {
                         </div>
                     )}
                 </div>
+
 
                 <button
                     disabled={loading}

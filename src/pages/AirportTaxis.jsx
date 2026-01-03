@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link } from "react-router-dom";
 import {
     Plane,
     Clock,
@@ -6,39 +6,42 @@ import {
     Leaf,
     UserCheck,
     CheckCircle,
-} from 'lucide-react';
+} from "lucide-react";
+import { useAuth } from "../contexts/AuthContext";
 
 const AirportTaxis = () => {
+    const { isAuthenticated } = useAuth();
+
     const features = [
         {
             icon: <Clock className="h-6 w-6" />,
-            title: 'Pre-Booked Peace of Mind',
+            title: "Pre-Booked Peace of Mind",
             description:
-                'Schedule your airport transfer in advance and travel knowing everything is arranged ahead of time.',
+                "Schedule your airport transfer in advance and travel knowing everything is arranged ahead of time.",
         },
         {
             icon: <Plane className="h-6 w-6" />,
-            title: 'Live Flight Monitoring',
+            title: "Live Flight Monitoring",
             description:
-                'Our control centre tracks your flight in real time and adjusts pickup times automatically if your flight changes.',
+                "Our control centre tracks your flight in real time and adjusts pickup times automatically if your flight changes.",
         },
         {
             icon: <UserCheck className="h-6 w-6" />,
-            title: 'Meet & Greet Service',
+            title: "Meet & Greet Service",
             description:
-                'Choose our Meet & Greet option and be welcomed at arrivals with a name board and guided to your vehicle.',
+                "Choose our Meet & Greet option and be welcomed at arrivals with a name board and guided to your vehicle.",
         },
         {
             icon: <ShieldCheck className="h-6 w-6" />,
-            title: 'Safe & Professional Drivers',
+            title: "Safe & Professional Drivers",
             description:
-                'All drivers are fully licensed, experienced, and trained to deliver a smooth and secure journey.',
+                "All drivers are fully licensed, experienced, and trained to deliver a smooth and secure journey.",
         },
         {
             icon: <Leaf className="h-6 w-6" />,
-            title: 'Greener Travel Options',
+            title: "Greener Travel Options",
             description:
-                'We operate a modern fleet with fuel-efficient and low-emission vehicles wherever possible.',
+                "We operate a modern fleet with fuel-efficient and low-emission vehicles wherever possible.",
         },
     ];
 
@@ -70,19 +73,41 @@ const AirportTaxis = () => {
                             <div className="space-y-4 text-gray-600">
                                 <p>
                                     Our airport taxi service is designed to remove uncertainty from
-                                    your journey. Pre-book your pickup or drop-off and arrive on time,
-                                    every time.
+                                    your journey. Pre-book your pickup or drop-off and arrive on
+                                    time, every time.
                                 </p>
                                 <p>
-                                    We monitor flights around the clock, ensuring your driver is ready
-                                    when you land—no waiting, no chasing taxis, and no delays.
+                                    We monitor flights around the clock, ensuring your driver is
+                                    ready when you land—no waiting and no delays.
                                 </p>
                             </div>
 
-                            <div className="mt-8">
-                                <Link to="/booking" className="btn-primary px-6 py-3 inline-block">
+                            {/* CTA (AUTH AWARE) */}
+                            <div className="mt-8 flex flex-col sm:flex-row gap-4">
+                                <Link
+                                    to="/booking"
+                                    className="btn-primary px-6 py-3 text-center"
+                                >
                                     Book an Airport Taxi
                                 </Link>
+
+                                {!isAuthenticated && (
+                                    <Link
+                                        to="/login"
+                                        className="px-6 py-3 rounded-lg border border-primary-600 text-primary-600 font-semibold hover:bg-primary-50 transition-colors text-center"
+                                    >
+                                        Login for Faster Booking
+                                    </Link>
+                                )}
+
+                                {isAuthenticated && (
+                                    <Link
+                                        to="/dashboard"
+                                        className="px-6 py-3 rounded-lg border border-primary-600 text-primary-600 font-semibold hover:bg-primary-50 transition-colors text-center"
+                                    >
+                                        Go to Dashboard
+                                    </Link>
+                                )}
                             </div>
                         </div>
 
@@ -139,10 +164,10 @@ const AirportTaxis = () => {
                         </h3>
                         <div className="space-y-4">
                             {[
-                                'Driver meets you inside arrivals with a personalised name board',
-                                'Assistance with luggage and guidance to your vehicle',
-                                'Ideal for business travellers, families, and first-time visitors',
-                                'Available for airport pickups and selected drop-off locations',
+                                "Driver meets you inside arrivals with a personalised name board",
+                                "Assistance with luggage and guidance to your vehicle",
+                                "Ideal for business travellers, families, and first-time visitors",
+                                "Available for airport pickups and selected drop-off locations",
                             ].map((point, index) => (
                                 <div key={index} className="flex items-start space-x-3">
                                     <CheckCircle className="h-6 w-6 text-primary-600 flex-shrink-0 mt-0.5" />
@@ -153,8 +178,8 @@ const AirportTaxis = () => {
 
                         <div className="mt-6 bg-primary-50 border border-primary-100 rounded-lg p-4">
                             <p className="text-gray-700">
-                                <strong>Pricing:</strong> Meet &amp; Greet services start from{' '}
-                                <span className="font-semibold text-primary-600">£55.00</span>{' '}
+                                <strong>Pricing:</strong> Meet &amp; Greet services start from{" "}
+                                <span className="font-semibold text-primary-600">£55.00</span>{" "}
                                 for drop-offs within the city centre.
                             </p>
                         </div>
@@ -162,7 +187,7 @@ const AirportTaxis = () => {
                 </div>
             </section>
 
-            {/* CTA Section */}
+            {/* CTA Footer */}
             <section className="bg-gradient-to-r from-primary-600 to-primary-800 text-white py-16">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                     <h2 className="text-3xl md:text-4xl font-bold mb-4">
@@ -171,12 +196,30 @@ const AirportTaxis = () => {
                     <p className="text-xl mb-8 text-primary-100">
                         Pre-book your airport transfer and let us take care of the rest
                     </p>
-                    <Link
-                        to="/booking"
-                        className="inline-block bg-white text-primary-600 hover:bg-gray-100 font-semibold py-3 px-8 rounded-lg transition-colors"
-                    >
-                        Book Your Airport Taxi
-                    </Link>
+
+                    {!isAuthenticated ? (
+                        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                            <Link
+                                to="/booking"
+                                className="inline-block bg-white text-primary-600 hover:bg-gray-100 font-semibold py-3 px-8 rounded-lg transition-colors"
+                            >
+                                Book Your Airport Taxi
+                            </Link>
+                            <Link
+                                to="/login"
+                                className="inline-block border border-white text-white hover:bg-white hover:text-primary-600 font-semibold py-3 px-8 rounded-lg transition-colors"
+                            >
+                                Login
+                            </Link>
+                        </div>
+                    ) : (
+                        <Link
+                            to="/booking"
+                            className="inline-block bg-white text-primary-600 hover:bg-gray-100 font-semibold py-3 px-8 rounded-lg transition-colors"
+                        >
+                            Book Now
+                        </Link>
+                    )}
                 </div>
             </section>
         </div>

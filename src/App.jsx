@@ -22,6 +22,7 @@ import AirportTaxis from './pages/AirportTaxis';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import BookingFormPage from './pages/BookingForm';
+import BookingDetails from './pages/BookingDetails';
 
 function App() {
   return (
@@ -71,6 +72,8 @@ function App() {
                     </ProtectedRoute>
                   }
                 />
+                <Route path="/bookings/:id" element={<BookingDetails />} />
+
                 <Route
                   path="/booking/cars"
                   element={
