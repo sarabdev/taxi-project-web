@@ -20,6 +20,9 @@ const CAR_TYPES = [
     { value: "van", label: "Van" },
 ];
 
+const autocompleteRequest = {
+    componentRestrictions: { country: "gb" },
+};
 const BookingForm = () => {
     const navigate = useNavigate();
     const { setDraftBooking } = useBookings();
@@ -38,6 +41,17 @@ const BookingForm = () => {
         returnDate: "",
         returnTime: "",
     });
+
+    const getTodayDate = () => {
+        const now = new Date();
+        return now.toISOString().split("T")[0]; // YYYY-MM-DD
+    };
+
+    const getCurrentTime = () => {
+        const now = new Date();
+        return now.toTimeString().slice(0, 5); // HH:mm
+    };
+
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -65,6 +79,37 @@ const BookingForm = () => {
             alert("Please enter booking date and time");
             return;
         }
+
+        const pickupDateTime = new Date(`${formData.bookingDate}T${formData.bookingTime}`);
+        if (Number.isNaN(pickupDateTime.getTime())) {
+            alert("Invalid booking date/time");
+            return;
+        }
+
+        if (pickupDateTime < new Date()) {
+            alert("Past date/time not allowed");
+            return;
+        }
+
+        if (formData.isRoundTrip) {
+            if (!formData.returnDate || !formData.returnTime) {
+                alert("Please enter return date and time");
+                return;
+            }
+
+            const returnDateTime = new Date(`${formData.returnDate}T${formData.returnTime}`);
+            if (Number.isNaN(returnDateTime.getTime())) {
+                alert("Invalid return date/time");
+                return;
+            }
+
+            if (returnDateTime < pickupDateTime) {
+                alert("Return date/time must be after pickup");
+                return;
+            }
+        }
+
+
 
         setLoading(true);
 
@@ -147,6 +192,7 @@ const BookingForm = () => {
                         <label className="block text-sm font-medium mb-2">From</label>
                         <GooglePlacesAutocomplete
                             apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}
+                            autocompletionRequest={autocompleteRequest}
                             selectProps={{
                                 value: fromPlace,
                                 onChange: setFromPlace,
@@ -160,6 +206,7 @@ const BookingForm = () => {
                         <label className="block text-sm font-medium mb-2">To</label>
                         <GooglePlacesAutocomplete
                             apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}
+                            autocompletionRequest={autocompleteRequest}
                             selectProps={{
                                 value: toPlace,
                                 onChange: setToPlace,
@@ -249,6 +296,7 @@ const BookingForm = () => {
 
                 {/* DATES */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
                     {/* BOOKING DATE & TIME */}
                     <div>
                         <label className="block text-sm font-medium mb-2">
@@ -257,26 +305,34 @@ const BookingForm = () => {
                         </label>
 
                         <div className="grid grid-cols-2 gap-3">
+                            {/* DATE */}
                             <input
-                                type="text"
+                                type="date"
                                 name="bookingDate"
                                 value={formData.bookingDate}
                                 onChange={handleChange}
-                                placeholder="e.g. 25 Sept 2025"
+                                min={getTodayDate()}   // 🚫 no past dates
                                 className="input-field"
                                 required
                             />
 
+                            {/* TIME */}
                             <input
-                                type="text"
+                                type="time"
                                 name="bookingTime"
                                 value={formData.bookingTime}
                                 onChange={handleChange}
-                                placeholder="e.g. 6:30 PM"
+                                min={
+                                    formData.bookingDate === getTodayDate()
+                                        ? getCurrentTime() // 🚫 no past time today
+                                        : undefined
+                                }
                                 className="input-field"
                                 required
                             />
                         </div>
+
+
                     </div>
 
                     {/* RETURN DATE & TIME (ROUND TRIP) */}
@@ -288,29 +344,41 @@ const BookingForm = () => {
                             </label>
 
                             <div className="grid grid-cols-2 gap-3">
+                                {/* RETURN DATE */}
                                 <input
-                                    type="text"
+                                    type="date"
                                     name="returnDate"
                                     value={formData.returnDate}
                                     onChange={handleChange}
-                                    placeholder="e.g. 30 Sept 2025"
+                                    min={formData.bookingDate || getTodayDate()} // 🚫 before booking
                                     className="input-field"
                                     required
                                 />
 
+                                {/* RETURN TIME */}
                                 <input
-                                    type="text"
+                                    type="time"
                                     name="returnTime"
                                     value={formData.returnTime}
                                     onChange={handleChange}
-                                    placeholder="e.g. 9:00 AM"
+                                    min={
+                                        formData.returnDate === formData.bookingDate
+                                            ? formData.bookingTime // 🚫 before pickup time
+                                            : undefined
+                                    }
                                     className="input-field"
                                     required
                                 />
                             </div>
+
+                            <p className="text-xs text-gray-500 mt-1">
+                                Return must be after pickup
+                            </p>
                         </div>
                     )}
+
                 </div>
+
 
 
                 <button

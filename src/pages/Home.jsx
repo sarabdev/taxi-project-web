@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   CheckCircle,
@@ -7,17 +8,22 @@ import {
   Calendar,
   ArrowRight,
 } from "lucide-react";
+
 import { useAuth } from "../contexts/AuthContext";
+import GetQuoteDialog from "../components/GetQuoteDialog";
 
 const Home = () => {
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAuth();
+
+  const [quoteOpen, setQuoteOpen] = useState(false);
 
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
       <section className="relative bg-gradient-to-r from-primary-600 to-primary-800 text-white">
         <div className="absolute inset-0 bg-black opacity-20"></div>
+
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32">
           <div className="text-center max-w-3xl mx-auto">
             <h1 className="text-4xl md:text-6xl font-bold mb-6">
@@ -48,6 +54,13 @@ const Home = () => {
                 >
                   Create Account
                 </button>
+
+                <button
+                  onClick={() => setQuoteOpen(true)}
+                  className="border border-white text-white hover:bg-white hover:text-primary-600 font-semibold py-3 px-8 rounded-lg transition-colors"
+                >
+                  Get a Quote
+                </button>
               </div>
             ) : (
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -65,6 +78,13 @@ const Home = () => {
                 >
                   Book a Ride
                   <ArrowRight className="h-5 w-5" />
+                </button>
+
+                <button
+                  onClick={() => setQuoteOpen(true)}
+                  className="border border-white text-white hover:bg-white hover:text-primary-600 font-semibold py-3 px-8 rounded-lg transition-colors"
+                >
+                  Get a Quote
                 </button>
               </div>
             )}
@@ -130,15 +150,30 @@ const Home = () => {
               Track bookings, save time, and enjoy priority service
             </p>
 
-            <button
-              onClick={() => navigate("/register")}
-              className="bg-white text-primary-600 hover:bg-gray-100 font-semibold py-3 px-8 rounded-lg transition-colors"
-            >
-              Get Started
-            </button>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <button
+                onClick={() => navigate("/register")}
+                className="bg-white text-primary-600 hover:bg-gray-100 font-semibold py-3 px-8 rounded-lg transition-colors"
+              >
+                Get Started
+              </button>
+
+              <button
+                onClick={() => setQuoteOpen(true)}
+                className="border border-white text-white hover:bg-white hover:text-primary-600 font-semibold py-3 px-8 rounded-lg transition-colors"
+              >
+                Get a Quote
+              </button>
+            </div>
           </div>
         </section>
       )}
+
+      {/* GET QUOTE DIALOG */}
+      <GetQuoteDialog
+        open={quoteOpen}
+        onClose={() => setQuoteOpen(false)}
+      />
     </div>
   );
 };

@@ -11,9 +11,9 @@ const getToken = () => localStorage.getItem("ar_token");
 // -------------------------------
 export const pricingService = {
   /**
-   * Calculate distance & price between two places
-   * @param {string} fromPlaceId
-   * @param {string} toPlaceId
+   * 🔒 PROTECTED
+   * Used during booking & payment
+   * Requires authentication
    */
   async calculatePrice({ fromPlaceId, toPlaceId }) {
     const token = getToken();
@@ -53,6 +53,46 @@ export const pricingService = {
       };
     } catch (err) {
       console.error("pricing calculate error:", err);
+      return {
+        ok: false,
+        message: "Network error",
+      };
+    }
+  },
+
+  /**
+   * 🌍 PUBLIC QUOTE
+   * Used by Home / Dashboard "Get a Quote"
+   * No authentication required
+   */
+  async getQuote({ fromPlaceId, toPlaceId }) {
+    try {
+      const res = await fetch(`${API_BASE}/api/pricing/quote`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          fromPlaceId,
+          toPlaceId,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        return {
+          ok: false,
+          message: data.message || "Failed to get quote",
+        };
+      }
+
+      return {
+        ok: true,
+        data,
+      };
+    } catch (err) {
+      console.error("pricing quote error:", err);
       return {
         ok: false,
         message: "Network error",

@@ -73,9 +73,15 @@ const BookingDetails = () => {
         );
     }
 
-    const pickupDate = booking.pickupDateTime
-        ? new Date(booking.pickupDateTime)
-        : null;
+    const pickupDateTime =
+        booking?.bookingDate && booking?.bookingTime
+            ? new Date(`${booking.bookingDate}T${booking.bookingTime}`)
+            : null;
+
+    const returnDateTime =
+        booking?.returnDate && booking?.returnTime
+            ? new Date(`${booking.returnDate}T${booking.returnTime}`)
+            : null;
 
     // --------------------------------
     // PAGE
@@ -158,13 +164,31 @@ const BookingDetails = () => {
                             <div>
                                 <p className="text-sm text-gray-500">Pickup Date & Time</p>
                                 <p className="font-semibold">
-                                    {pickupDate?.toLocaleDateString()} at{" "}
-                                    {pickupDate?.toLocaleTimeString([], {
-                                        hour: "2-digit",
-                                        minute: "2-digit",
-                                    })}
+                                    {pickupDateTime
+                                        ? `${pickupDateTime.toLocaleDateString()} at ${pickupDateTime.toLocaleTimeString([], {
+                                            hour: "2-digit",
+                                            minute: "2-digit",
+                                        })}`
+                                        : "—"}
                                 </p>
+
                             </div>
+                            {booking.returnDate && booking.returnTime && (
+                                <div className="flex gap-3">
+                                    <Calendar className="h-6 w-6 text-primary-600 mt-1" />
+                                    <div>
+                                        <p className="text-sm text-gray-500">Return Date & Time</p>
+                                        <p className="font-semibold">
+                                            {returnDateTime?.toLocaleDateString()} at{" "}
+                                            {returnDateTime?.toLocaleTimeString([], {
+                                                hour: "2-digit",
+                                                minute: "2-digit",
+                                            })}
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+
                         </div>
 
                         <div>

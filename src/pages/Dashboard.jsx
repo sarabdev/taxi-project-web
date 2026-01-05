@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useBookings } from "../contexts/BookingsContext";
@@ -8,11 +9,16 @@ import {
     Plus,
     Eye,
     XCircle,
+    Route,
 } from "lucide-react";
+
+import GetQuoteDialog from "../components/GetQuoteDialog";
 
 const Dashboard = () => {
     const { user, logout } = useAuth();
     const { bookings } = useBookings();
+
+    const [quoteOpen, setQuoteOpen] = useState(false);
 
     return (
         <div className="min-h-screen bg-gray-50 py-8">
@@ -30,7 +36,10 @@ const Dashboard = () => {
                     </div>
 
                     <div className="flex gap-3">
-                        <Link to="/booking" className="btn-primary flex items-center gap-2">
+                        <Link
+                            to="/booking"
+                            className="btn-primary flex items-center gap-2"
+                        >
                             <Plus className="h-5 w-5" />
                             New Booking
                         </Link>
@@ -44,21 +53,49 @@ const Dashboard = () => {
                     </div>
                 </div>
 
-                {/* Start Booking */}
-                <div className="card mb-8">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                        Start a New Booking
-                    </h2>
-                    <p className="text-gray-600">
-                        Book a taxi in just a few steps with instant confirmation.
-                    </p>
+                {/* ACTION CARDS */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
 
-                    <div className="mt-5">
-                        <Link to="/booking" className="btn-primary inline-flex items-center gap-2">
-                            <Calendar className="h-5 w-5" />
-                            Create Booking
-                        </Link>
+                    {/* Start Booking */}
+                    <div className="card">
+                        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                            Start a New Booking
+                        </h2>
+                        <p className="text-gray-600">
+                            Book a taxi in just a few steps with instant confirmation.
+                        </p>
+
+                        <div className="mt-5">
+                            <Link
+                                to="/booking"
+                                className="btn-primary inline-flex items-center gap-2"
+                            >
+                                <Calendar className="h-5 w-5" />
+                                Create Booking
+                            </Link>
+                        </div>
                     </div>
+
+                    {/* Get a Quote */}
+                    <div className="card bg-gradient-to-br from-primary-600 to-primary-700 text-white">
+                        <h2 className="text-2xl font-bold mb-2">
+                            Get a Fare Estimate
+                        </h2>
+                        <p className="text-primary-100">
+                            Check distance and estimated price before booking.
+                        </p>
+
+                        <div className="mt-5">
+                            <button
+                                onClick={() => setQuoteOpen(true)}
+                                className="bg-white text-primary-700 font-semibold px-6 py-3 rounded-lg inline-flex items-center gap-2 hover:bg-gray-100 transition"
+                            >
+                                <Route className="h-5 w-5" />
+                                Get a Quote
+                            </button>
+                        </div>
+                    </div>
+
                 </div>
 
                 {/* Bookings */}
@@ -118,7 +155,6 @@ const Dashboard = () => {
 
                                         {/* RIGHT */}
                                         <div className="flex items-center gap-3 flex-wrap">
-                                            {/* STATUS */}
                                             <span
                                                 className={`px-3 py-1 rounded-full text-sm font-semibold ${b.status === "confirmed"
                                                         ? "bg-green-50 text-green-700"
@@ -149,7 +185,6 @@ const Dashboard = () => {
                                                 )}
                                             </span>
 
-                                            {/* VIEW DETAILS */}
                                             <Link
                                                 to={`/bookings/${b._id}`}
                                                 className="inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold border rounded-lg hover:bg-gray-50"
@@ -165,6 +200,12 @@ const Dashboard = () => {
                     )}
                 </div>
             </div>
+
+            {/* QUOTE DIALOG */}
+            <GetQuoteDialog
+                open={quoteOpen}
+                onClose={() => setQuoteOpen(false)}
+            />
         </div>
     );
 };
