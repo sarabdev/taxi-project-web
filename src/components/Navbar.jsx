@@ -39,8 +39,8 @@ const Navbar = () => {
                     key={item.path}
                     to={item.path}
                     className={`text-sm font-medium transition-colors ${isActive(item.path)
-                        ? "text-primary-600"
-                        : "text-gray-700 hover:text-primary-600"
+                      ? "text-primary-600"
+                      : "text-gray-700 hover:text-primary-600"
                       }`}
                   >
                     {item.name}
@@ -68,10 +68,19 @@ const Navbar = () => {
                     </Link>
                   </div>
                 </div>
-
+                <a
+                  href="https://wa.me/15550410781?text=book"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm font-medium text-green-600 hover:text-green-700 transition-colors"
+                >
+                  Book with WhatsApp
+                </a>
                 <Link to="/booking" className="btn-primary py-2 px-4 text-sm">
                   Book Now
                 </Link>
+
+
               </>
             ) : (
               <>
@@ -81,7 +90,14 @@ const Navbar = () => {
                 >
                   Dashboard
                 </Link>
-
+                <a
+                  href="https://wa.me/15550410781?text=book"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm font-medium text-green-600 hover:text-green-700 transition-colors"
+                >
+                  Book with WhatsApp
+                </a>
                 <button
                   onClick={logout}
                   className="text-sm font-medium text-gray-700 hover:text-red-600"
@@ -116,8 +132,8 @@ const Navbar = () => {
                     to={item.path}
                     onClick={() => setIsOpen(false)}
                     className={`block px-3 py-2 rounded-md text-base font-medium ${isActive(item.path)
-                        ? "bg-primary-50 text-primary-600"
-                        : "text-gray-700 hover:bg-gray-50"
+                      ? "bg-primary-50 text-primary-600"
+                      : "text-gray-700 hover:bg-gray-50"
                       }`}
                   >
                     {item.name}
@@ -145,7 +161,14 @@ const Navbar = () => {
                     Airport Taxis
                   </Link>
                 </div>
-
+                <a
+                  href="https://wa.me/15550410781?text=book"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm font-medium text-green-600 hover:text-green-700 transition-colors"
+                >
+                  Book with WhatsApp
+                </a>
                 <Link
                   to="/booking"
                   onClick={() => setIsOpen(false)}

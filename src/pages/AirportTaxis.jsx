@@ -107,7 +107,16 @@ const AirportTaxis = () => {
                                     >
                                         Go to Dashboard
                                     </Link>
+
                                 )}
+                                <a
+                                    href="https://wa.me/15550410781?text=book"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-sm font-medium text-green-600 hover:text-green-700 transition-colors"
+                                >
+                                    Book with WhatsApp
+                                </a>
                             </div>
                         </div>
 
@@ -211,14 +220,32 @@ const AirportTaxis = () => {
                             >
                                 Login
                             </Link>
+                            <a
+                                href="https://wa.me/15550410781?text=book"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-sm font-medium text-green-600 hover:text-green-700 transition-colors"
+                            >
+                                Book with WhatsApp
+                            </a>
                         </div>
                     ) : (
-                        <Link
-                            to="/booking"
-                            className="inline-block bg-white text-primary-600 hover:bg-gray-100 font-semibold py-3 px-8 rounded-lg transition-colors"
-                        >
-                            Book Now
-                        </Link>
+                        <>
+                            <a
+                                href="https://wa.me/15550410781?text=book"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-sm font-medium text-green-600 hover:text-green-700 transition-colors"
+                            >
+                                Book with WhatsApp
+                            </a>
+                            <Link
+                                to="/booking"
+                                className="inline-block bg-white text-primary-600 hover:bg-gray-100 font-semibold py-3 px-8 rounded-lg transition-colors"
+                            >
+                                Book Now
+                            </Link>
+                        </>
                     )}
                 </div>
             </section>
