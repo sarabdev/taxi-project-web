@@ -1,10 +1,6 @@
-const API_BASE =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
-
-// -------------------------------
-// Helpers
-// -------------------------------
-const getToken = () => localStorage.getItem("ar_token");
+const API_BASE = import.meta.env.DEV
+  ? import.meta.env.VITE_LOCAL_API_BASE_URL || "http://localhost:5000"
+  : import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
 // -------------------------------
 // Payment Service
@@ -16,16 +12,7 @@ export const paymentService = {
    * @param {string} bookingId - temp or draft booking id
    * @param {string} currency - default GBP
    */
-  async createPaymentIntent({ amount, bookingId, currency = "GBP" }) {
-    const token = getToken();
-
-    if (!token) {
-      return {
-        ok: false,
-        message: "Authentication required",
-      };
-    }
-
+  async createPaymentIntent({ amount, bookingId, currency = "GBP", customerEmail, customerName }) {
     if (!amount || amount <= 0) {
       return {
         ok: false,
@@ -38,12 +25,13 @@ export const paymentService = {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           amount,
           bookingId,
           currency,
+          customerEmail,
+          customerName,
         }),
       });
 

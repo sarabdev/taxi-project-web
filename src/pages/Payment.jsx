@@ -44,6 +44,8 @@ const Payment = () => {
         amount: draftBooking.pricing.totalAmount,
         currency: "GBP",
         bookingId: draftBooking.tempId || "draft",
+        customerEmail: draftBooking.customerEmail,
+        customerName: draftBooking.customerName,
       });
 
       if (!res.ok) {
@@ -95,9 +97,12 @@ const Payment = () => {
 
         stripePaymentIntentId,
         stripePaymentMethodId,
+        customerName: draftBooking.customerName,
+        customerEmail: draftBooking.customerEmail,
+        customerPhone: draftBooking.customerPhone,
       });
 
-      if (!res?.success) {
+      if (!res?.ok) {
         setError(
           res?.message ||
           "Payment succeeded, but booking could not be confirmed."
@@ -106,11 +111,11 @@ const Payment = () => {
         return;
       }
 
-      clearDraftBooking();
       setCompleted(true);
 
       setTimeout(() => {
-        navigate("/dashboard");
+        clearDraftBooking();
+        navigate("/");
       }, 2500);
     } catch (err) {
       console.error("Booking creation failed:", err);
@@ -130,7 +135,7 @@ const Payment = () => {
    */
   if (completed) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4">
+      <div className="min-h-[100dvh] bg-gray-50 flex items-center justify-center py-8 sm:py-12 px-4">
         <div className="max-w-md w-full">
           <div className="card text-center">
             <div className="inline-flex items-center justify-center w-20 h-20 bg-green-100 rounded-full mx-auto mb-6">
@@ -142,21 +147,21 @@ const Payment = () => {
             </h2>
 
             <p className="text-gray-600 mb-6">
-              Your payment was successful and your booking is confirmed.
+              Your payment was successful. Your booking details have been sent to {draftBooking.customerEmail}.
             </p>
 
-            <div className="bg-gray-50 rounded-lg p-6 mb-6">
+            <div className="bg-gray-50 rounded-lg p-4 sm:p-6 mb-6">
               <div className="space-y-3 text-left">
-                <div className="flex justify-between">
+                <div className="flex items-start justify-between gap-4">
                   <span className="text-gray-600">From:</span>
-                  <span className="font-semibold">
+                  <span className="font-semibold text-right break-words min-w-0">
                     {draftBooking.fromAddress}
                   </span>
                 </div>
 
-                <div className="flex justify-between">
+                <div className="flex items-start justify-between gap-4">
                   <span className="text-gray-600">To:</span>
-                  <span className="font-semibold">
+                  <span className="font-semibold text-right break-words min-w-0">
                     {draftBooking.toAddress}
                   </span>
                 </div>
@@ -171,7 +176,7 @@ const Payment = () => {
             </div>
 
             <p className="text-sm text-gray-500">
-              Redirecting to dashboard…
+              Redirecting to the home page…
             </p>
           </div>
         </div>
@@ -185,11 +190,11 @@ const Payment = () => {
    * ---------------------------------------------------------
    */
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gray-50 py-6 sm:py-8">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-6 sm:mb-8">
           <button
             onClick={() => navigate(-1)}
             className="flex items-center text-primary-600 hover:text-primary-700 mb-4"
@@ -198,7 +203,7 @@ const Payment = () => {
             Back
           </button>
 
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">
             Payment Details
           </h1>
 
@@ -207,11 +212,11 @@ const Payment = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-8">
           {/* PAYMENT */}
           <div className="lg:col-span-2">
             <div className="card">
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
                 <h2 className="text-xl font-semibold">
                   Secure Payment
                 </h2>
@@ -228,7 +233,17 @@ const Payment = () => {
               ) : (
                 <Elements
                   stripe={stripePromise}
-                  options={{ clientSecret }}
+                  options={{
+                    clientSecret,
+                    appearance: {
+                      theme: "stripe",
+                      variables: {
+                        colorPrimary: "#0284c7",
+                        fontSizeBase: "16px",
+                        borderRadius: "12px",
+                      },
+                    },
+                  }}
                 >
                   <StripePaymentForm onSuccess={handleStripeSuccess} />
                 </Elements>
@@ -256,16 +271,16 @@ const Payment = () => {
               </h2>
 
               <div className="space-y-3 text-sm">
-                <div className="flex justify-between">
+                <div className="flex items-start justify-between gap-4">
                   <span className="text-gray-600">From:</span>
-                  <span className="font-medium">
+                  <span className="font-medium text-right break-words min-w-0">
                     {draftBooking.fromAddress}
                   </span>
                 </div>
 
-                <div className="flex justify-between">
+                <div className="flex items-start justify-between gap-4">
                   <span className="text-gray-600">To:</span>
-                  <span className="font-medium">
+                  <span className="font-medium text-right break-words min-w-0">
                     {draftBooking.toAddress}
                   </span>
                 </div>

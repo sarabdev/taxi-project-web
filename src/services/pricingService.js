@@ -1,5 +1,6 @@
-const API_BASE =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+const API_BASE = import.meta.env.DEV
+  ? import.meta.env.VITE_LOCAL_API_BASE_URL || "http://localhost:5000"
+  : import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
 // -------------------------------
 // Helpers
